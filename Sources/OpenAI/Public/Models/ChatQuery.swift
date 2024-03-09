@@ -27,6 +27,7 @@ public struct Chat: Codable, Equatable {
     /// The name of the author of this message. `name` is required if role is `function`, and it should be the name of the function whose response is in the `content`. May contain a-z, A-Z, 0-9, and underscores, with a maximum length of 64 characters.
     public let name: String?
     public let functionCall: ChatFunctionCall?
+    public let toolCalls: [ToolCall]?
     
     public enum Role: String, Codable, Equatable {
         case system
@@ -40,13 +41,15 @@ public struct Chat: Codable, Equatable {
         case content
         case name
         case functionCall = "function_call"
+        case toolCalls = "tool_calls"
     }
     
-    public init(role: Role, content: String? = nil, name: String? = nil, functionCall: ChatFunctionCall? = nil) {
+    public init(role: Role, content: String? = nil, name: String? = nil, functionCall: ChatFunctionCall? = nil, toolCalls: [ToolCall]? = nil) {
         self.role = role
         self.content = content
         self.name = name
         self.functionCall = functionCall
+        self.toolCalls = toolCalls
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -69,6 +72,12 @@ public struct Chat: Codable, Equatable {
     }
 }
 
+public struct ToolCall: Codable, Equatable {
+    public let id: String
+    public let type: ChatToolType
+    public let function: ChatFunctionCall
+}
+
 public struct ChatFunctionCall: Codable, Equatable {
     /// The name of the function to call.
     public let name: String?
@@ -80,6 +89,45 @@ public struct ChatFunctionCall: Codable, Equatable {
         self.arguments = arguments
     }
 }
+
+public struct ChatTool: Codable, Equatable {
+    public let type: ChatToolType
+    public let function: ChatFunctionDeclaration
+    
+    public init(type: ChatToolType, function: ChatFunctionDeclaration) {
+        self.type = type
+        self.function = function
+    }
+}
+    
+public enum ChatToolType: String, Codable {
+    case function
+}
+
+
+    
+public struct ChatToolChoice: Codable, Equatable {
+    public let type: ChatToolType
+    public let function: Function
+    
+    public init(type: ChatToolType, function: Function) {
+        self.type = type
+        self.function = function
+    }
+}
+
+extension ChatToolChoice {
+    public struct Function : Codable, Equatable {
+        public let name: String
+        
+        public init(name: String) {
+            self.name = name
+        }
+    }
+}
+
+
+
 
 
 /// See the [guide](/docs/guides/gpt/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
@@ -233,6 +281,10 @@ public struct ChatQuery: Equatable, Codable, Streamable {
     public let functions: [ChatFunctionDeclaration]?
     /// Controls how the model responds to function calls. "none" means the model does not call a function, and responds to the end-user. "auto" means the model can pick between and end-user or calling a function. Specifying a particular function via `{"name": "my_function"}` forces the model to call that function. "none" is the default when no functions are present. "auto" is the default if functions are present.
     public let functionCall: FunctionCall?
+    
+    public let tools: [ChatTool]?
+    
+    public let toolChoice: ChatToolChoice?
     /// What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and  We generally recommend altering this or top_p but not both.
     public let temperature: Double?
     /// An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered.
@@ -285,6 +337,8 @@ public struct ChatQuery: Equatable, Codable, Streamable {
         case messages
         case functions
         case functionCall = "function_call"
+        case tools
+        case toolChoice = "tool_choice"
         case temperature
         case topP = "top_p"
         case n
@@ -298,11 +352,13 @@ public struct ChatQuery: Equatable, Codable, Streamable {
         case responseFormat = "response_format"
     }
     
-    public init(model: Model, messages: [Chat], responseFormat: ResponseFormat? = nil, functions: [ChatFunctionDeclaration]? = nil, functionCall: FunctionCall? = nil, temperature: Double? = nil, topP: Double? = nil, n: Int? = nil, stop: [String]? = nil, maxTokens: Int? = nil, presencePenalty: Double? = nil, frequencyPenalty: Double? = nil, logitBias: [String : Int]? = nil, user: String? = nil, stream: Bool = false) {
+    public init(model: Model, messages: [Chat], responseFormat: ResponseFormat? = nil, functions: [ChatFunctionDeclaration]? = nil, functionCall: FunctionCall? = nil, tools: [ChatTool]? = nil, toolChoice: ChatToolChoice? = nil, temperature: Double? = nil, topP: Double? = nil, n: Int? = nil, stop: [String]? = nil, maxTokens: Int? = nil, presencePenalty: Double? = nil, frequencyPenalty: Double? = nil, logitBias: [String : Int]? = nil, user: String? = nil, stream: Bool = false) {
         self.model = model
         self.messages = messages
         self.functions = functions
         self.functionCall = functionCall
+        self.tools = tools
+        self.toolChoice = toolChoice
         self.temperature = temperature
         self.topP = topP
         self.n = n
