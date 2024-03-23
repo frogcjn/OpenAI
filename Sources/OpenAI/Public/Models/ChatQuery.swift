@@ -8,13 +8,13 @@
 import Foundation
 
 // See more https://platform.openai.com/docs/guides/text-generation/json-mode
-public struct ResponseFormat: Codable, Equatable {
+public struct ResponseFormat: Codable, Equatable, Sendable {
     public static let jsonObject = ResponseFormat(type: .jsonObject)
     public static let text = ResponseFormat(type: .text)
     
     public let type: Self.ResponseFormatType
     
-    public enum ResponseFormatType: String, Codable, Equatable {
+    public enum ResponseFormatType: String, Codable, Equatable, Sendable {
         case jsonObject = "json_object"
         case text
     }
@@ -90,7 +90,7 @@ public struct ChatFunctionCall: Codable, Equatable, Sendable {
     }
 }
 
-public struct ChatTool: Codable, Equatable {
+public struct ChatTool: Codable, Equatable, Sendable {
     public let type: ChatToolType
     public let function: ChatFunctionDeclaration
     
@@ -106,7 +106,7 @@ public enum ChatToolType: String, Codable, Sendable {
 
 
     
-public struct ChatToolChoice: Codable, Equatable {
+public struct ChatToolChoice: Codable, Equatable, Sendable {
     public let type: ChatToolType
     public let function: Function
     
@@ -117,7 +117,7 @@ public struct ChatToolChoice: Codable, Equatable {
 }
 
 extension ChatToolChoice {
-    public struct Function : Codable, Equatable {
+    public struct Function : Codable, Equatable, Sendable {
         public let name: String
         
         public init(name: String) {
@@ -131,7 +131,7 @@ extension ChatToolChoice {
 
 
 /// See the [guide](/docs/guides/gpt/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
-public struct JSONSchema: Codable, Equatable {
+public struct JSONSchema: Codable, Equatable, Sendable {
     public let type: JSONType
     public let properties: [String: Property]?
     public let required: [String]?
@@ -148,7 +148,7 @@ public struct JSONSchema: Codable, Equatable {
         case multipleOf, minimum, maximum
     }
     
-    public struct Property: Codable, Equatable {
+    public struct Property: Codable, Equatable, Sendable {
         public let type: JSONType
         public let description: String?
         public let format: String?
@@ -189,7 +189,7 @@ public struct JSONSchema: Codable, Equatable {
         }
     }
 
-    public enum JSONType: String, Codable {
+    public enum JSONType: String, Codable, Sendable {
         case integer = "integer"
         case string = "string"
         case boolean = "boolean"
@@ -199,7 +199,7 @@ public struct JSONSchema: Codable, Equatable {
         case `null` = "null"
     }
 
-    public struct Items: Codable, Equatable {
+    public struct Items: Codable, Equatable, Sendable {
         public let type: JSONType
         public let properties: [String: Property]?
         public let pattern: String?
@@ -246,7 +246,7 @@ public struct JSONSchema: Codable, Equatable {
     }
 }
 
-public struct ChatFunctionDeclaration: Codable, Equatable {
+public struct ChatFunctionDeclaration: Codable, Equatable, Sendable {
     /// The name of the function to be called. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 64.
     public let name: String
     
@@ -270,7 +270,7 @@ public struct ChatQueryFunctionCall: Codable, Equatable {
     public let arguments: String?
 }
 
-public struct ChatQuery: Equatable, Codable, Streamable {
+public struct ChatQuery: Equatable, Codable, Streamable, Sendable {
     /// ID of the model to use. Currently, only gpt-3.5-turbo and gpt-3.5-turbo-0301 are supported.
     public let model: Model
     /// An object specifying the format that the model must output.
@@ -306,7 +306,7 @@ public struct ChatQuery: Equatable, Codable, Streamable {
     
     var stream: Bool = false
 
-    public enum FunctionCall: Codable, Equatable {
+    public enum FunctionCall: Codable, Equatable, Sendable {
         case none
         case auto
         case function(String)
