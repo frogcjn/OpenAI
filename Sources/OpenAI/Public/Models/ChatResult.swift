@@ -7,9 +7,9 @@
 
 import Foundation
 
-public struct ChatResult: Codable, Equatable {
+public struct ChatResult: Codable, Equatable, Sendable {
     
-    public struct Choice: Codable, Equatable {
+    public struct Choice: Codable, Equatable, Sendable {
       
         public let index: Int
         /// Exists only if it is a complete message.
@@ -24,7 +24,7 @@ public struct ChatResult: Codable, Equatable {
         }
     }
     
-    public struct Usage: Codable, Equatable {
+    public struct Usage: Codable, Equatable, Sendable {
         public let promptTokens: Int
         public let completionTokens: Int
         public let totalTokens: Int
