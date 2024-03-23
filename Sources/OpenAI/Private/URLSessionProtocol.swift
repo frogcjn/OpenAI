@@ -10,7 +10,7 @@ import Foundation
 import FoundationNetworking
 #endif
 
-protocol URLSessionProtocol {
+protocol URLSessionProtocol : Sendable {
     
     func dataTask(with request: URLRequest, completionHandler: @escaping @Sendable (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTaskProtocol
     func dataTask(with request: URLRequest) -> URLSessionDataTaskProtocol

@@ -7,7 +7,7 @@
 
 import Foundation
 
-internal class ArrayWithThreadSafety<Element> {
+internal final class ArrayWithThreadSafety<Element> : @unchecked Sendable {
     private var array = [Element]()
     private let queue = DispatchQueue(label: "us.kalaf.OpenAI.threadSafeArray", attributes: .concurrent)
 
